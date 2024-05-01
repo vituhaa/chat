@@ -29,23 +29,33 @@ int main()
         return 1;
     }
     // отправка сообщения серверу
-    const char *message = "Hello, server!";
-    send(client_socket, message, strlen(message), 0);
+    cout << "Please enter a message for the server: ";
+    cout << "Remember: if you enter -exit-, you will stop this chat" << endl;
+    while (true)
+    {
+        string message;
+        cout << ">";
+        getline(cin, message);
+        if (message == "exit")
+        {
+            break;
+        }
+        // метод c_str используется из-за того,что функция send() изначально принимает на вход const char*, а я хочу передать строку такую,
+        // которую передаю с клавиатуры, нужно использовать c_str(),который возвращает указатель на const char*, содержащий строку
+        send(client_socket, message.c_str(), message.size(), 0);
 
-    // Получение ответа от сервера
-    char buffer[1024];
-    int bytesReceived = recv(client_socket, buffer, sizeof(buffer), 0);
-    if (bytesReceived == -1)
-    {
-        cerr << "ERROR: cannot receive data from server" << endl;
-    }
-    else
-    {
-        buffer[bytesReceived] = '\0';
-        cout << "Received response from server: " << buffer << endl;
+        // Получение ответа от сервера
+        char buffer[1024]={0};
+        int bytesReceived = recv(client_socket, buffer, sizeof(buffer), 0);
+        if (bytesReceived > 0)
+        {
+            buffer[bytesReceived] = '\0';
+            cout << "Server: " << buffer << endl;
+        }
     }
 
     // закрытие соединения
     close(client_socket);
     return 0;
 }
+
